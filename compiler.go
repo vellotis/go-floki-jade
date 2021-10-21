@@ -5,8 +5,8 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
-	"github.com/go-floki/jade/parser"
-	"github.com/go-floki/jade/path"
+	"github.com/vellotis/go-floki-jade/parser"
+	"github.com/vellotis/go-floki-jade/path"
 	"go/ast"
 	gp "go/parser"
 	gt "go/token"
@@ -23,16 +23,23 @@ import (
 )
 
 var builtinFunctions = [...]string{
+	//"and", // handled by the library as "&&"
+	//"not", // handled by the library as "!"
+	//"or", // handled by the library as "||"
+	"json", // handled by the library
+	"unescaped", // handled by the library - https://pkg.go.dev/html/template#HTML
+
+	"call", // calls method in variable - https://github.com/golang/go/blob/release-branch.go1.15/src/text/template/funcs.go#L312
+	"slice", // returns the result of slicing its first argument by the remaining arguments
+	         // https://github.com/golang/go/blob/release-branch.go1.15/src/text/template/funcs.go#L250
 	"len",
 	"print",
 	"printf",
 	"println",
-	"urlquery",
-	"js",
-	"json",
-	"index",
-	"html",
-	"unescaped",
+	"urlquery", // escaped URL - https://github.com/golang/go/blob/release-branch.go1.15/src/text/template/funcs.go#L740
+	"js", // escapes JS - https://github.com/golang/go/blob/release-branch.go1.15/src/text/template/funcs.go#L734
+	"index", // gets element from slice on index - https://github.com/golang/go/blob/release-branch.go1.15/src/text/template/funcs.go#L206
+	"html", // https://pkg.go.dev/text/template#HTMLEscaper
 }
 
 // Compiler is the main interface of Amber Template Engine.
@@ -701,7 +708,7 @@ func (c *Compiler) visitExpression(outerexpr ast.Expr) string {
 			name := expr.(*ast.Ident).Name
 			if len(name) >= len("__DOLLAR__") && name[:len("__DOLLAR__")] == "__DOLLAR__" {
 				if name == "__DOLLAR__" {
-					stack.PushFront(`.`)
+					stack.PushFront(`$`)
 				} else {
 					stack.PushFront(`$` + expr.(*ast.Ident).Name[len("__DOLLAR__"):])
 				}
