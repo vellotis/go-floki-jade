@@ -3,7 +3,7 @@ package parser
 import (
 	"bytes"
 	"fmt"
-	"github.com/go-floki/jade/path"
+	"github.com/vellotis/go-floki-jade/path"
 	"io"
 	"io/ioutil"
 	"net/http"
